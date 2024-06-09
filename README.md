@@ -72,6 +72,10 @@ It's important to make sure your submission is only visible to people with colla
 
 - Just hard-code all keys in `backend/src/settings/base.py`
 
+### The backend project isn't reflecting my changes. What gives?
+
+- This project doesn't have hot-reloading configured out of the box. The simplest workaround is to run `docker-compose build` when you make changes.
+
 ### Why is this repository so... bad?
 
 - Truemed has high technical standards
