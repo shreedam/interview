@@ -1,5 +1,21 @@
 # Truemed Interview Repo
 
+## Next Steps
+What was completed:
+1. Call truemed api to get redirect url by passing as many values from the ui as possible
+2. Truemed api returns redirect url
+3. Load truemed UI
+4. Upon completion on the truemed side, redirect back to checkout screen
+5. Checkout screen should go to confirmation (I missed the part, where this was not required!)
+
+What I would do next:
+1. Confirm that the funds are actually being captured by truemed.
+2. On the UI handle success and error paths. Likely using a combination of url params and local storage.
+3. Create a cartId or something similar to pass as the `idempotency_key` to prevent creating an excessive number of payment sessions for the same cart.
+4. Introduce some models on the api.
+5. Add some validation and error handling.
+
+
 ## Senior Engineer
 
 This project is meant to assess your ability to perform at a senior level at Truemed. Specifically, we expect senior developers to own large projects from end-to-end, even if some pieces are outside of your expertise. This often involves some research & planning before jumping straight to implementation (and course-correcting as you come across new information).
