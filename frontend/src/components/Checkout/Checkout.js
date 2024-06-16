@@ -64,6 +64,15 @@ class Checkout extends React.Component {
   componentDidMount() {
     const { cart } = this.props.store;
     try {
+      const savedState = localStorage.getItem('currentState');
+      if (savedState) {
+        this.props.setPayment('success');
+        this.props.toggleCheckoutComplete();
+        this.props.emptyCart();
+
+        // remove currentStatus from localStorage
+        localStorage.removeItem('currentState');
+      }
       const serializedCart = JSON.stringify(cart);
       localStorage.setItem("cart", serializedCart);
     } catch (err) {
@@ -128,6 +137,10 @@ class Checkout extends React.Component {
             this.props.toggleCheckoutComplete();
           }).then(res => {
               console.dir(res);
+
+              // save current state to localStorage for when we return
+              localStorage.setItem('currentState', JSON.stringify(this.state));
+
               // redirect to Truemed payment session url:
               window.location.href = res.redirect_url;
         });
