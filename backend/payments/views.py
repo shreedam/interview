@@ -36,7 +36,6 @@ def charge_view(request):
             "idempotency_key": str(uuid.uuid4()),
             "customer_email": email,
             "customer_name": name,
-            "customer_state": "TX"
         }
 
         response = requests.post(url, json=payload, headers=headers)
