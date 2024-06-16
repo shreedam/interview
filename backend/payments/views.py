@@ -20,7 +20,7 @@ def charge_view(request):
         order_items = getOrderItemsFromCart(cart)
         
         # # Create a Truemed PaymentSession here
-        url = "https://dev-api.truemed.com/payments/v1/create_payment_session"
+        url = settings.TRUEMED_CREATE_PAYMENT_API_ENDPOINT
 
         headers = {
             "accept": "application/json",
