@@ -134,3 +134,7 @@ REST_AUTH_REGISTER_SERIALIZERS = {
 }
 
 REST_USE_JWT = True
+
+TRUEMED_API_KEY = "bapvdndumdha"
+TRUEMED_SUCCESS_URL = "https://www.bing.com"
+TRUEMED_FAILURE_URL = "https://www.google.com"
