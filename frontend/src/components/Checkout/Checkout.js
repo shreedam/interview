@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
+import jwt_decode from "jwt-decode"; // for decoding JWT tokens
 import {
   setPayment,
   toggleCheckoutComplete,
@@ -22,6 +23,7 @@ import "./css/checkout.css";
 const mapStateToProps = state => {
   return {
     store: state.store,
+    token: state.auth.token,
     isAuthenticated: state.auth.token !== null
   };
 };
@@ -62,6 +64,15 @@ class Checkout extends React.Component {
   componentDidMount() {
     const { cart } = this.props.store;
     try {
+      const savedState = localStorage.getItem('currentState');
+      if (savedState) {
+        this.props.setPayment('success');
+        this.props.toggleCheckoutComplete();
+        this.props.emptyCart();
+
+        // remove currentStatus from localStorage
+        localStorage.removeItem('currentState');
+      }
       const serializedCart = JSON.stringify(cart);
       localStorage.setItem("cart", serializedCart);
     } catch (err) {
@@ -89,16 +100,28 @@ class Checkout extends React.Component {
     return parseFloat(subtotal + afterTax + shippingNumeric).toFixed(2);
   }
 
+  getUserEmail() {
+    let decoded_token = undefined;
+    if (this.props.token) {
+      decoded_token = jwt_decode(this.props.token);
+    }
+    return decoded_token.email;
+  }
+
   handlePayment(values) {
     const total = this.calculateTotal();
     const { firstName, lastName } = values.shippingAddress;
-
+    const { cart } = this.props.store;
+    const email = this.getUserEmail();
 
     return new Promise(res => {
         try {
           let formData = new FormData();
           formData.append("amount", total * 100); // *100 because stripe processes pence
           formData.append("currency", "GBP");
+          formData.append("name", `${firstName} ${lastName}`);
+          formData.append("cart", JSON.stringify(cart));
+          formData.append("email", email);
           return fetch(`${API_PATH}payments/`, {
             method: "POST",
             headers: {
@@ -114,6 +137,10 @@ class Checkout extends React.Component {
             this.props.toggleCheckoutComplete();
           }).then(res => {
               console.dir(res);
+
+              // save current state to localStorage for when we return
+              localStorage.setItem('currentState', JSON.stringify(this.state));
+
               // redirect to Truemed payment session url:
               window.location.href = res.redirect_url;
         });

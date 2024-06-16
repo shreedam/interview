@@ -134,3 +134,8 @@ REST_AUTH_REGISTER_SERIALIZERS = {
 }
 
 REST_USE_JWT = True
+
+TRUEMED_CREATE_PAYMENT_API_ENDPOINT = "https://dev-api.truemed.com/payments/v1/create_payment_session"
+TRUEMED_API_KEY = "bapvdndumdha"
+TRUEMED_SUCCESS_URL = "http://localhost:3000/checkout"
+TRUEMED_FAILURE_URL = "http://localhost:3000/error"

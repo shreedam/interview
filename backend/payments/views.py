@@ -1,26 +1,66 @@
 import json
+import uuid
 
-import stripe
+import requests
 from django.conf import settings
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-
-stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 @require_http_methods(["POST"])
 @csrf_exempt
 def charge_view(request):
     try:
-        truemed_payment_session_redirect_url = 'https://bing.com'
-        # Create a Truemed PaymentSession here
+        amount = request.POST["amount"]
+        name = request.POST["name"]
+        cart = json.loads(request.POST["cart"])
+        email = request.POST["email"]
+
+        order_items = getOrderItemsFromCart(cart)
+        
+        # # Create a Truemed PaymentSession here
+        url = settings.TRUEMED_CREATE_PAYMENT_API_ENDPOINT
+
+        headers = {
+            "accept": "application/json",
+            "content-type": "application/json",
+            "x-truemed-api-key": settings.TRUEMED_API_KEY,
+        }
+
+        payload = {
+            "total_amount": int(amount),
+            "order_items": order_items,
+            "success_url": settings.TRUEMED_SUCCESS_URL,
+            "failure_url": settings.TRUEMED_FAILURE_URL,
+            "idempotency_key": str(uuid.uuid4()),
+            "customer_email": email,
+            "customer_name": name,
+        }
+
+        response = requests.post(url, json=payload, headers=headers)
+
+        response_dict = json.loads(response.text)
 
         return HttpResponse({
-            json.dumps({"redirect_url": truemed_payment_session_redirect_url})
+            json.dumps({"redirect_url": response_dict["redirect_url"]})
         })
     # Something else happened, completely unrelated to Stripe
     except Exception as e:
         return HttpResponse(
-            json.dumps({"message": "Unable to process payment, try again."})
+            json.dumps({"error": str(e)})
         )
+
+def getOrderItemsFromCart(cart):
+    order_items = []
+    for item in cart:
+        order_items.append({
+            "name": item["name"],
+            "amount": convertStringAmountToInt(item["price"]),
+            "quantity": item["quantity"],
+            "sku": str(item["id"]),
+        })
+    return order_items
+
+def convertStringAmountToInt(amount):
+    return int(float(amount)*100)
